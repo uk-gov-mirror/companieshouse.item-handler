@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.12</version>
+        <version>2.1.15</version>
         <relativePath/>
     </parent>
 
@@ -67,8 +67,6 @@
         <!-- Docker property -->
         <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
 
-        <sonar.projectKey>uk.gov.companieshouse:item-handler</sonar.projectKey>
-        <sonar.projectName>item-handler</sonar.projectName>
         <sonar.exclusions>
             **/config/FeatureOptions.java,
             **/config/FeatureOptionsConfig.java,
@@ -87,15 +85,6 @@
             **/itemsummary/PaymentDetails.java,
             **/itemsummary/OrderItemPair.java
         </sonar.exclusions>
-        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
-        <sonar.java.binaries>${project.basedir}/target</sonar.java.binaries>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml,
-            ${project.basedir}/target/site/jacoco-it/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
-        <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
-        <sonar.login></sonar.login>
-        <sonar.password></sonar.password>
 
         <start-class>uk.gov.companieshouse.itemhandler.ItemHandlerApplication</start-class>
 
