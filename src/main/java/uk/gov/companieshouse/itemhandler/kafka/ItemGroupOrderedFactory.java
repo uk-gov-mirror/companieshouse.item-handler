@@ -128,7 +128,7 @@ public class ItemGroupOrderedFactory {
      */
     private Map<String, String> createCertifiedCopyFirstFilingHistoryDocOptions(final CertifiedCopyItemOptions options) {
         final Map<String, String> filingHistoryOptions = new HashMap<>();
-        final FilingHistoryDocument firstDocument = options.getFilingHistoryDocuments().get(0);
+        final FilingHistoryDocument firstDocument = options.getFilingHistoryDocuments().getFirst();
         filingHistoryOptions.put(FILING_HISTORY_TYPE, firstDocument.getFilingHistoryType());
         filingHistoryOptions.put(FILING_HISTORY_ID, firstDocument.getFilingHistoryId());
         filingHistoryOptions.put(FILING_HISTORY_DESCRIPTION, firstDocument.getFilingHistoryDescription());
