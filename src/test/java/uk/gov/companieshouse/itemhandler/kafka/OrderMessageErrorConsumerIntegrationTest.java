@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MockServerContainer;
@@ -39,6 +40,7 @@ import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 @SpringBootTest
 @Import(EmbeddedKafkaBrokerConfiguration.class)
+@EmbeddedKafka
 @TestPropertySource(locations = "classpath:application.properties",
         properties = {"uk.gov.companieshouse.item-handler.error-consumer=true"})
 class OrderMessageErrorConsumerIntegrationTest {
@@ -70,8 +72,7 @@ class OrderMessageErrorConsumerIntegrationTest {
 
     @BeforeAll
     static void before() {
-        container = new MockServerContainer(DockerImageName.parse(
-                "mockserver/mockserver:mockserver-5.15.0"));
+        container = new MockServerContainer(DockerImageName.parse("mockserver/mockserver:mockserver-7.5.0"));
         container.start();
         TestEnvironmentSetupHelper.setEnvironmentVariable("API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
@@ -79,6 +80,8 @@ class OrderMessageErrorConsumerIntegrationTest {
         TestEnvironmentSetupHelper.setEnvironmentVariable("PAYMENTS_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
         TestEnvironmentSetupHelper.setEnvironmentVariable("DOCUMENT_API_LOCAL_URL",
+                "http://" + container.getHost() + ":" + container.getServerPort());
+        TestEnvironmentSetupHelper.setEnvironmentVariable("ORACLE_QUERY_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
     }
 

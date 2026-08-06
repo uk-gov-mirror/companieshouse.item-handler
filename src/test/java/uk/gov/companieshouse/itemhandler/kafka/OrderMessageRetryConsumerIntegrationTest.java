@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,9 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MockServerContainer;
@@ -39,6 +40,7 @@ import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 @SpringBootTest
 @Import(EmbeddedKafkaBrokerConfiguration.class)
+@EmbeddedKafka
 @TestPropertySource(locations = "classpath:application.properties",
         properties={"uk.gov.companieshouse.item-handler.error-consumer=false"})
 class OrderMessageRetryConsumerIntegrationTest {
@@ -73,8 +75,7 @@ class OrderMessageRetryConsumerIntegrationTest {
 
     @BeforeAll
     static void before() {
-        container = new MockServerContainer(DockerImageName.parse(
-                "mockserver/mockserver:mockserver-5.15.0"));
+        container = new MockServerContainer(DockerImageName.parse("mockserver/mockserver:mockserver-7.5.0"));
         container.start();
         TestEnvironmentSetupHelper.setEnvironmentVariable("API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
@@ -82,6 +83,8 @@ class OrderMessageRetryConsumerIntegrationTest {
         TestEnvironmentSetupHelper.setEnvironmentVariable("PAYMENTS_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
         TestEnvironmentSetupHelper.setEnvironmentVariable("DOCUMENT_API_LOCAL_URL",
+                "http://" + container.getHost() + ":" + container.getServerPort());
+        TestEnvironmentSetupHelper.setEnvironmentVariable("ORACLE_QUERY_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
     }
 
@@ -109,7 +112,7 @@ class OrderMessageRetryConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/certified-certificate.json",
                                 StandardCharsets.UTF_8))));
@@ -134,7 +137,7 @@ class OrderMessageRetryConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/certified-copy.json",
                                 StandardCharsets.UTF_8))));
@@ -159,7 +162,7 @@ class OrderMessageRetryConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/missing-image-delivery.json",
                                 StandardCharsets.UTF_8))));
@@ -206,7 +209,7 @@ class OrderMessageRetryConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/certified-certificate.json",
                                 StandardCharsets.UTF_8))));

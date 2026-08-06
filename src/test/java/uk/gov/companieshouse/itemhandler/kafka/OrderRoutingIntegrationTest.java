@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.kafka.test.utils.KafkaTestUtils.getSingleRecord;
 
 import email.email_send;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -46,6 +48,7 @@ import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 @SpringBootTest
 @Import(EmbeddedKafkaBrokerConfiguration.class)
+@EmbeddedKafka
 @TestPropertySource(locations = "classpath:application.properties",
         properties={"uk.gov.companieshouse.item-handler.error-consumer=false"})
 class OrderRoutingIntegrationTest {
@@ -79,8 +82,7 @@ class OrderRoutingIntegrationTest {
 
     @BeforeAll
     static void before() {
-        container = new MockServerContainer(DockerImageName.parse(
-                "mockserver/mockserver:mockserver-5.15.0"));
+        container = new MockServerContainer(DockerImageName.parse("mockserver/mockserver:mockserver-7.5.0"));
         container.start();
         TestEnvironmentSetupHelper.setEnvironmentVariable("API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
@@ -88,6 +90,8 @@ class OrderRoutingIntegrationTest {
         TestEnvironmentSetupHelper.setEnvironmentVariable("PAYMENTS_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
         TestEnvironmentSetupHelper.setEnvironmentVariable("DOCUMENT_API_LOCAL_URL",
+                "http://" + container.getHost() + ":" + container.getServerPort());
+        TestEnvironmentSetupHelper.setEnvironmentVariable("ORACLE_QUERY_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
     }
 
@@ -119,7 +123,7 @@ class OrderRoutingIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/mixed-order.json",
                                 StandardCharsets.UTF_8))));

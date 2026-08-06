@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -22,50 +22,34 @@
         <java.version>21</java.version>
 
         <!-- Plugin Dependencies -->
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-
-        <spring-boot-maven-plugin.version>3.5.14</spring-boot-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-
-        <spring.boot.version>3.5.15</spring.boot.version>
-        <opentelemetry-instrumentation-bom.version>2.29.0</opentelemetry-instrumentation-bom.version>
-        <opentelemetry.version>1.63.0</opentelemetry.version>
-
-        <spring-framework.version>6.2.19</spring-framework.version>
-        <tomcat-embed-core.version>10.1.55</tomcat-embed-core.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+        <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <opentelemetry-instrumentation-bom.version>2.30.0</opentelemetry-instrumentation-bom.version>
+        <opentelemetry.version>1.64.0</opentelemetry.version>
+        <jib-maven-plugin.version>3.5.2</jib-maven-plugin.version>
 
         <!-- Internal Dependencies -->
-        <api-sdk-java.version>6.6.9</api-sdk-java.version>
-        <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
-        <ch-kafka.version>3.0.4</ch-kafka.version>
-        <environment-reader-library.version>3.0.5</environment-reader-library.version>
-        <kafka-models.version>3.0.25</kafka-models.version>
-        <private-api-sdk-java.version>4.0.327</private-api-sdk-java.version>
-        <structured-logging.version>3.0.36</structured-logging.version>
+        <ch-dependency-bom.version>0.1.15</ch-dependency-bom.version>
+        <ch-test-bom.version>0.1.15</ch-test-bom.version>
+        <api-sdk-java.version>7.2.2</api-sdk-java.version>
+        <private-api-sdk-java.version>7.2.7</private-api-sdk-java.version>
 
         <!-- External Dependencies -->
+        <spring.boot.version>4.1.0</spring.boot.version>
         <avro.version>1.12.1</avro.version>
-        <gson.version>2.13.2</gson.version>
-        <log4j.version>2.25.4</log4j.version>
-        <log4j-to-slf4j.version>2.25.4</log4j-to-slf4j.version>
+        <gson.version>2.14.0</gson.version>
+        <log4j.version>2.26.1</log4j.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <snakeyaml.version>2.6</snakeyaml.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
-        <plexus-utils.version>3.6.1</plexus-utils.version>
-        <kotlin.version>2.2.21</kotlin.version>
 
         <!-- Testing Dependencies -->
-        <junit-jupiter-engine.version>5.13.3</junit-jupiter-engine.version>
-        <junit-vintage-engine.version>5.13.4</junit-vintage-engine.version>
-        <system-rules.version>1.17.2</system-rules.version>
-        <testcontainers.version>1.21.2</testcontainers.version>
-        <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
-        <spring-kafka-test.version>4.0.0-M2</spring-kafka-test.version>
+        <system-rules.version>1.19.0</system-rules.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
+        <mockserver-client-java.version>7.5.0</mockserver-client-java.version>
         <hamcrest.version>3.0</hamcrest.version>
-
-        <!-- Docker property -->
-        <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
 
         <sonar.exclusions>
             **/config/FeatureOptions.java,
@@ -97,17 +81,23 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
+                <groupId>uk.gov.companieshouse</groupId>
+                <artifactId>ch-dependency-bom</artifactId>
+                <version>${ch-dependency-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>${spring-framework.version}</version>
+                <groupId>uk.gov.companieshouse</groupId>
+                <artifactId>ch-test-bom</artifactId>
+                <version>${ch-test-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -117,119 +107,6 @@
                 <version>${opentelemetry-instrumentation-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- Align OpenTelemetry core with instrumentation starter to prevent runtime issues -->
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-context</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-api</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-common</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-logging</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-otlp</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-otlp-common</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-sender-okhttp</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-common</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-logs</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-metrics</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-trace</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-extension-autoconfigure-spi</artifactId>
-                <version>${opentelemetry.version}</version>
-            </dependency>
-
-            <!-- Transitive dependencies -->
-            <!-- CVE-2025-66566 -->
-            <dependency>
-                <groupId>org.lz4</groupId>
-                <artifactId>lz4-java</artifactId>
-                <version>1.8.1</version>
-            </dependency>
-            <!-- CVE-2020-29582(5.3) -->
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib</artifactId>
-                <version>${kotlin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-jdk8</artifactId>
-                <version>${kotlin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-jdk7</artifactId>
-                <version>${kotlin.version}</version>
-            </dependency>
-            <!-- CVE-2026-34477, CVE-2026-34479 -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-to-slf4j</artifactId>
-                <version>${log4j-to-slf4j.version}</version>
-            </dependency>
-            <!-- CVE-2026-41293, CVE-2026-41284, CVE-2026-43513, CVE-2026-43512, CVE-2026-42498, CVE-2026-43515 -->
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>${tomcat-embed-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-websocket</artifactId>
-                <version>${tomcat-embed-core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -257,25 +134,9 @@
         </dependency>
 
         <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
 
         <dependency>
@@ -323,7 +184,11 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-sdk-manager-java-library</artifactId>
-            <version>${api-sdk-manager-java-library.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>environment-reader-library</artifactId>
         </dependency>
 
         <dependency>
@@ -334,7 +199,6 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>structured-logging</artifactId>
-            <version>${structured-logging.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -357,7 +221,6 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>kafka-models</artifactId>
-            <version>${kafka-models.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.jetty</groupId>
@@ -391,7 +254,6 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>ch-kafka</artifactId>
-            <version>${ch-kafka.version}</version>
         </dependency>
 
         <dependency>
@@ -405,28 +267,39 @@
             <version>${snakeyaml.version}</version>
         </dependency>
 
+        <!-- Test -->
         <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>org.pcollections</groupId>
-                    <artifactId>pcollections</artifactId>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>uk.gov.companieshouse</groupId>
-            <artifactId>environment-reader-library</artifactId>
-            <version>${environment-reader-library.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -451,7 +324,7 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mockserver</artifactId>
+            <artifactId>testcontainers-mockserver</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
@@ -469,6 +342,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.graphql-java</groupId>
+                    <artifactId>graphql-java</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
