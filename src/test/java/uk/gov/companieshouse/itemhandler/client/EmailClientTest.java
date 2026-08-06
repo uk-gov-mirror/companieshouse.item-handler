@@ -10,8 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.SendEmail;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -49,7 +48,7 @@ class EmailClientTest {
 
     @ParameterizedTest
     @ValueSource(ints = {200, 400})
-    void testApiResponseStatusCode(final int expectedHttpStatus) throws JsonProcessingException, ApiErrorResponseException, EmailClientException {
+    void testApiResponseStatusCode(final int expectedHttpStatus) throws ApiErrorResponseException, EmailClientException {
         // Arrange:
         ApiResponse<Void> apiResponse = new ApiResponse<>(expectedHttpStatus, Map.of());
 
@@ -80,7 +79,7 @@ class EmailClientTest {
     }
 
     @Test
-    void givenValidPayload_whenEmailClientThrowsApiException_thenReturnError() throws JsonProcessingException, ApiErrorResponseException, EmailClientException {
+    void givenValidPayload_whenEmailClientThrowsApiException_thenReturnError() throws ApiErrorResponseException, EmailClientException {
         // Arrange:
         PrivateSendEmailPost privateSendEmailPost = mock(PrivateSendEmailPost.class);
         when(privateSendEmailPost.execute()).thenThrow(ApiErrorResponseException.class);
@@ -108,7 +107,7 @@ class EmailClientTest {
         assertThat(expectedException.getMessage(), is("Error sending payload to CHS Kafka API: "));
     }
 
-    private EmailSend createDeliverableItemGroupWithItems() throws JsonProcessingException {
+    private EmailSend createDeliverableItemGroupWithItems() {
         OrderData orderData = new OrderData();
         String kind = "item#certificate";
         DeliveryTimescale timescale = DeliveryTimescale.STANDARD;
@@ -117,7 +116,7 @@ class EmailClientTest {
         return mapEmailData(new DeliverableItemGroup(orderData, kind, timescale, items));
     }
 
-    private EmailSend mapEmailData(final DeliverableItemGroup itemGroup) throws JsonProcessingException {
+    private EmailSend mapEmailData(final DeliverableItemGroup itemGroup) {
         EmailSend emailSend = new EmailSend();
         emailSend.setAppId("test-app-id");
         emailSend.setMessageId(UUID.randomUUID().toString());

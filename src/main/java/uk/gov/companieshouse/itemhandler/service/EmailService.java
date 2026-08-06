@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.itemhandler.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.email.EmailSend;
 import uk.gov.companieshouse.itemhandler.client.EmailClient;
 import uk.gov.companieshouse.itemhandler.exception.NonRetryableException;
@@ -36,8 +37,7 @@ public class EmailService {
     private final ConfirmationMapperFactory confirmationMapperFactory;
     private final EmailClient emailClient;
 
-    public EmailService(
-            final ObjectMapper objectMapper,
+    public EmailService(@Qualifier("snakeCaseMapper")final ObjectMapper objectMapper,
             final ConfirmationMapperFactory confirmationMapperFactory,
             final EmailClient emailClient) {
         this.objectMapper = objectMapper;
@@ -66,14 +66,14 @@ public class EmailService {
 
             emailClient.sendEmail(emailSend);
 
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             String msg = String.format("Error converting order (%s) confirmation to JSON", itemGroup.getOrder().getReference());
             LOGGER.error(msg, exception);
             throw new NonRetryableException(msg);
         }
     }
 
-    private EmailSend mapEmailSend(DeliverableItemGroup itemGroup, OrderConfirmationMapper<?> mapper) throws JsonProcessingException {
+    private EmailSend mapEmailSend(DeliverableItemGroup itemGroup, OrderConfirmationMapper<?> mapper) {
         EmailMetadata<?> emailMetadata = mapper.map(itemGroup);
 
         EmailSend emailSend = new EmailSend();

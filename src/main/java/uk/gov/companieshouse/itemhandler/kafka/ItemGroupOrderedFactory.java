@@ -4,9 +4,9 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static uk.gov.companieshouse.itemhandler.logging.LoggingUtils.getLogMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.itemgroupordered.ItemGroupOrdered;
 import uk.gov.companieshouse.itemgroupordered.OrderedBy;
 import uk.gov.companieshouse.itemhandler.exception.KafkaMessagingException;
@@ -36,7 +36,7 @@ public class ItemGroupOrderedFactory {
     private final Logger logger;
     private final ObjectMapper objectMapper;
 
-    public ItemGroupOrderedFactory(Logger logger, ObjectMapper objectMapper) {
+    public ItemGroupOrderedFactory(Logger logger, @Qualifier("snakeCaseMapper") ObjectMapper objectMapper) {
         this.logger = logger;
         this.objectMapper = objectMapper;
     }
@@ -73,7 +73,7 @@ public class ItemGroupOrderedFactory {
         return new OrderedBy(actionedBy.getEmail(), actionedBy.getId());
     }
 
-    private uk.gov.companieshouse.itemgroupordered.Item createItem(final Item item) throws JsonProcessingException {
+    private uk.gov.companieshouse.itemgroupordered.Item createItem(final Item item) {
         return new uk.gov.companieshouse.itemgroupordered.Item(
                 item.getCompanyName(),
                 item.getCompanyNumber(),
@@ -110,10 +110,8 @@ public class ItemGroupOrderedFactory {
      * @param options the item options from which filing history options may be extracted
      * @return map of filing history item options, or <code>null</code> if the options provided are not those for
      * a certified copy
-     * @throws JsonProcessingException should there be an error serialising filing history description values
      */
-    private Map<String, String> createFilingHistoryItemOptions(final ItemOptions options)
-            throws JsonProcessingException {
+    private Map<String, String> createFilingHistoryItemOptions(final ItemOptions options) {
        if (options instanceof CertifiedCopyItemOptions) {
             return createCertifiedCopyFirstFilingHistoryDocOptions((CertifiedCopyItemOptions) options);
        }
@@ -127,11 +125,8 @@ public class ItemGroupOrderedFactory {
      * @param options {@link uk.gov.companieshouse.itemhandler.model.CertifiedCopyItemOptions} the
      *                current copy item being processed in the order
      * @return map of values representing copy item filing history options
-     * @throws JsonProcessingException should there be an error serialising filing history description
-     *                                 values
      */
-    private Map<String, String> createCertifiedCopyFirstFilingHistoryDocOptions(final CertifiedCopyItemOptions options)
-            throws JsonProcessingException {
+    private Map<String, String> createCertifiedCopyFirstFilingHistoryDocOptions(final CertifiedCopyItemOptions options) {
         final Map<String, String> filingHistoryOptions = new HashMap<>();
         final FilingHistoryDocument firstDocument = options.getFilingHistoryDocuments().get(0);
         filingHistoryOptions.put(FILING_HISTORY_TYPE, firstDocument.getFilingHistoryType());

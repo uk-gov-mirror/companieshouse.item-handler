@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.itemhandler.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +9,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.email.EmailSend;
 import uk.gov.companieshouse.itemhandler.client.EmailClient;
 import uk.gov.companieshouse.itemhandler.exception.NonRetryableException;
@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static uk.gov.companieshouse.itemhandler.model.DeliveryTimescale.STANDARD;
 
@@ -69,8 +68,8 @@ class EmailServiceTest {
     @Mock
     private EmailMetadata<CertifiedCopyEmailData> certCopyMetadata;
 
-    /** Extends {@link JsonProcessingException} so it can be instantiated in these tests. */
-    private static class TestJsonProcessingException extends JsonProcessingException {
+    /** Extends {@link JacksonException} so it can be instantiated in these tests. */
+    private static class TestJsonProcessingException extends JacksonException {
 
         protected TestJsonProcessingException(String msg) {
             super(msg);
@@ -79,7 +78,7 @@ class EmailServiceTest {
 
     @Test
     @DisplayName("Email service handles certified certificate emails correctly")
-    void serviceCallsMapMethodOnCertificateConfirmationMapper() throws JsonProcessingException {
+    void serviceCallsMapMethodOnCertificateConfirmationMapper() throws JacksonException {
         // given
         when(confirmationMapperFactory.getCertificateMapper()).thenReturn(certificateConfirmationMapper);
         when(certificateConfirmationMapper.map(any())).thenReturn(metadata);
@@ -104,7 +103,7 @@ class EmailServiceTest {
 
     @Test
     @DisplayName("Email service handles certified copy emails correctly")
-    void serviceCallsMapMethodOnCertifiedCopyConfirmationMapper() throws JsonProcessingException {
+    void serviceCallsMapMethodOnCertifiedCopyConfirmationMapper() throws JacksonException {
         // given
         when(confirmationMapperFactory.getCertifiedCopyMapper()).thenReturn(certifiedCopyConfirmationMapper);
         when(certifiedCopyConfirmationMapper.map(any())).thenReturn(certCopyMetadata);

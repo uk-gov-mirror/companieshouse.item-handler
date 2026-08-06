@@ -17,8 +17,6 @@ import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FI
 import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FILING_HISTORY_ID;
 import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FILING_HISTORY_TYPE;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -58,6 +56,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.itemgroupordered.ItemGroupOrdered;
 import uk.gov.companieshouse.itemhandler.config.EmbeddedKafkaBrokerConfiguration;
 import uk.gov.companieshouse.itemhandler.config.TestEnvironmentSetupHelper;
@@ -432,13 +432,13 @@ class OrderMessageDefaultConsumerIntegrationTest {
     }
 
     private static String getNestedStringValue(final JsonNode node, final String key) {
-        return node.findValuesAsText(key) != null &&
-                node.findValuesAsText(key).size() == 1 ?
-                node.findValuesAsText(key).get(0) : "";
+        return node.findValuesAsString(key) != null &&
+                node.findValuesAsString(key).size() == 1 ?
+                node.findValuesAsString(key).getFirst() : "";
     }
 
     private static String getStringValue(final JsonNode node, final String key) {
-        return node.get(key) != null ? node.get(key).textValue() : "";
+        return node.get(key) != null ? node.get(key).stringValue() : "";
     }
 
     private static void assertItemGroupOrderedMessageIsAsExpected(final ItemGroupOrdered message,
@@ -448,7 +448,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
         assertThat(message.getOrderId(), is(orderId));
         assertThat(message.getItems(), is(notNullValue()));
         assertThat(message.getItems().size(), is(1));
-        assertThat(message.getItems().get(0).getId(), is(itemId));
+        assertThat(message.getItems().getFirst().getId(), is(itemId));
         assertThat(message.getDeliveryDetails(), is(nullValue()));
     }
 }
