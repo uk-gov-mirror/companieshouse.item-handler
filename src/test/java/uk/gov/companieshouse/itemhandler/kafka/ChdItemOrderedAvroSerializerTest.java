@@ -8,8 +8,8 @@ import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 import uk.gov.companieshouse.orders.items.DeliveryDetails;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.companieshouse.itemhandler.util.TestUtils.createAvroOrder;
 import static uk.gov.companieshouse.itemhandler.util.TestUtils.createDeliveryDetails;
 

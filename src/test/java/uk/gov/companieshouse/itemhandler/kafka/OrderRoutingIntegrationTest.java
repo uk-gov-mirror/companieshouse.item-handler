@@ -34,7 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.MockServerContainer;
+import org.testcontainers.mockserver.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
 import uk.gov.companieshouse.itemgroupordered.ItemGroupOrdered;
 import uk.gov.companieshouse.itemhandler.config.EmbeddedKafkaBrokerConfiguration;
@@ -149,7 +149,7 @@ class OrderRoutingIntegrationTest {
         assertEquals(0, senderService.getLatch().getCount());
         assertNotNull(senderService.getItemGroupSent());
         assertThat(senderService.getItemGroupSent().getItems().size(), is(1));
-        assertThat(senderService.getItemGroupSent().getItems().get(0).getId(), is(itemId));
+        assertThat(senderService.getItemGroupSent().getItems().getFirst().getId(), is(itemId));
     }
 
     private OrderReceived getOrderReceived() {

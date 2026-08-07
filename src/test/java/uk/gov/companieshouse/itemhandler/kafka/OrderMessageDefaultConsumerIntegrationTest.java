@@ -54,7 +54,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.containers.MockServerContainer;
+import org.testcontainers.mockserver.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -146,12 +146,12 @@ class OrderMessageDefaultConsumerIntegrationTest {
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
 
         // when
-        ProducerRecord<String, OrderReceived> record = new ProducerRecord<>(
+        ProducerRecord<String, OrderReceived> producerRecord = new ProducerRecord<>(
                 kafkaTopics.getOrderReceived(),
                 kafkaTopics.getOrderReceived(),
                 getOrderReceived());
 
-        Future<RecordMetadata> future = orderReceivedProducer.send(record);
+        Future<RecordMetadata> future = orderReceivedProducer.send(producerRecord);
 
         // Log the result once the message has been sent
         RecordMetadata metadata = future.get(); // This will block until the message is sent
@@ -374,10 +374,10 @@ class OrderMessageDefaultConsumerIntegrationTest {
         // then
         assertEquals(0, orderMessageDefaultConsumerAspect.getAfterProcessOrderReceivedEventLatch().getCount());
         assertEquals(2, actual.count());
-        for (ConsumerRecord<String, ChdItemOrdered> record : actual) {
-            assertEquals("ORD-123123-123123", record.value().getReference());
-            assertNotNull(record.value().getItem());
-            assertEquals("MID-123123-" + midId++, record.value().getItem().getId());
+        for (ConsumerRecord<String, ChdItemOrdered> producerRecord : actual) {
+            assertEquals("ORD-123123-123123", producerRecord.value().getReference());
+            assertNotNull(producerRecord.value().getItem());
+            assertEquals("MID-123123-" + midId++, producerRecord.value().getItem().getId());
         }
     }
 
