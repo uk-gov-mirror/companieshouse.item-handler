@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.itemhandler.kafka;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.itemhandler.exception.KafkaMessagingException;
 import uk.gov.companieshouse.itemhandler.itemsummary.OrderItemPair;
 import uk.gov.companieshouse.itemhandler.logging.LoggingUtils;
@@ -48,7 +48,7 @@ public class ItemMessageFactory {
     private final SerializerFactory serializerFactory;
     private final ObjectMapper objectMapper;
 
-    public ItemMessageFactory(final SerializerFactory serializer, final ObjectMapper mapper) {
+    public ItemMessageFactory(final SerializerFactory serializer, @Qualifier("snakeCaseMapper") final ObjectMapper mapper) {
         serializerFactory = serializer;
         objectMapper = mapper;
     }
@@ -87,9 +87,8 @@ public class ItemMessageFactory {
      *
      * @param orderItemPair the original order and MID item pairing from which the message content is built
      * @return the resulting Kafka message content object
-     * @throws JsonProcessingException should there be an error serialising order content
      */
-    ChdItemOrdered buildChdItemOrdered(final OrderItemPair orderItemPair) throws JsonProcessingException {
+    ChdItemOrdered buildChdItemOrdered(final OrderItemPair orderItemPair) {
         OrderData order = orderItemPair.getOrder();
         final uk.gov.companieshouse.itemhandler.model.Item orderItem = orderItemPair.getItem();
         final ChdItemOrdered outgoing = new ChdItemOrdered();
@@ -145,10 +144,8 @@ public class ItemMessageFactory {
      *
      * @param item {@link uk.gov.companieshouse.itemhandler.model.Item} the current MID item being processed in the order
      * @return map of values representing MID item options
-     * @throws JsonProcessingException should there be an error serialising filing history description values
      */
-    private Map<String, String> createFirstItemOptionsForMid(final uk.gov.companieshouse.itemhandler.model.Item item)
-        throws JsonProcessingException {
+    private Map<String, String> createFirstItemOptionsForMid(final uk.gov.companieshouse.itemhandler.model.Item item) {
         // For now we know we are dealing with MID only.
         final MissingImageDeliveryItemOptions options = (MissingImageDeliveryItemOptions) item.getItemOptions();
         final Map<String, String> optionsForMid = new HashMap<>();

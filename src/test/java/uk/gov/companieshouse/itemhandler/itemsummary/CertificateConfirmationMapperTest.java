@@ -26,7 +26,7 @@ import uk.gov.companieshouse.itemhandler.model.Item;
 import uk.gov.companieshouse.itemhandler.model.OrderData;
 
 @ExtendWith(MockitoExtension.class)
-public class CertificateConfirmationMapperTest {
+class CertificateConfirmationMapperTest {
 
     @InjectMocks
     private CertificateConfirmationMapper mapper;

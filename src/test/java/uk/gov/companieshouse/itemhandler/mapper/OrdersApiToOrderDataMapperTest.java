@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.itemhandler.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +10,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.model.order.ActionedByApi;
 import uk.gov.companieshouse.api.model.order.DeliveryDetailsApi;
 import uk.gov.companieshouse.api.model.order.OrdersApi;
@@ -72,7 +72,9 @@ class OrdersApiToOrderDataMapperTest {
     static class Config {
         @Bean
         public ObjectMapper objectMapper() {
-            return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+            return JsonMapper.builder()
+                    .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                    .build();
         }
 
         @Bean
@@ -275,7 +277,7 @@ class OrdersApiToOrderDataMapperTest {
     }
 
     @Test
-    void testCertifiedCopyApiToCertifiedCopy() throws JsonProcessingException {
+    void testCertifiedCopyApiToCertifiedCopy() {
         CertifiedCopyApi certifiedCopyApi = new CertifiedCopyApi();
         certifiedCopyApi.setId(ID);
         certifiedCopyApi.setCompanyName(COMPANY_NAME);
@@ -383,14 +385,13 @@ class OrdersApiToOrderDataMapperTest {
         assertThat(target.getSurname(), is(source.getSurname()));
     }
 
-    private void assertItemOptionsSame(final CertifiedCopyItemOptionsApi source,
-                                       final CertifiedCopyItemOptions target) throws JsonProcessingException {
+    private void assertItemOptionsSame(final CertifiedCopyItemOptionsApi source, final CertifiedCopyItemOptions target) {
         assertThat(target.getCollectionLocation().getJsonName(), is(source.getCollectionLocation().getJsonName()));
         assertThat(target.getContactNumber(), is(source.getContactNumber()));
         assertThat(target.getDeliveryMethod().getJsonName(), is(source.getDeliveryMethod().getJsonName()));
         assertThat(target.getDeliveryTimescale().getJsonName(), is(source.getDeliveryTimescale().getJsonName()));
-        assertThat(objectMapper.writeValueAsString(target.getFilingHistoryDocuments()),
-                is(objectMapper.writeValueAsString(source.getFilingHistoryDocuments())));
+        assertThat(objectMapper.readTree(objectMapper.writeValueAsString(target.getFilingHistoryDocuments())),
+                is(objectMapper.readTree(objectMapper.writeValueAsString(source.getFilingHistoryDocuments()))));
         assertThat(target.getForename(), is(source.getForename()));
         assertThat(target.getSurname(), is(source.getSurname()));
     }

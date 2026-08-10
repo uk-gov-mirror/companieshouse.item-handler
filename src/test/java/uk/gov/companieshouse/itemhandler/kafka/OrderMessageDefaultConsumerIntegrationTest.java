@@ -11,13 +11,12 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.verify;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FILING_HISTORY_DESCRIPTION;
 import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FILING_HISTORY_DESCRIPTION_VALUES;
 import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FILING_HISTORY_ID;
 import static uk.gov.companieshouse.itemhandler.kafka.ItemGroupOrderedFactory.FILING_HISTORY_TYPE;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -44,20 +43,21 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.JsonBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.containers.MockServerContainer;
+import org.testcontainers.mockserver.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.itemgroupordered.ItemGroupOrdered;
 import uk.gov.companieshouse.itemhandler.config.EmbeddedKafkaBrokerConfiguration;
 import uk.gov.companieshouse.itemhandler.config.TestEnvironmentSetupHelper;
@@ -67,6 +67,7 @@ import uk.gov.companieshouse.orders.items.ChdItemOrdered;
 
 @SpringBootTest
 @Import(EmbeddedKafkaBrokerConfiguration.class)
+@EmbeddedKafka
 @TestPropertySource(
         locations = "classpath:application.properties",
         properties={"uk.gov.companieshouse.item-handler.error-consumer=false"}
@@ -95,16 +96,12 @@ class OrderMessageDefaultConsumerIntegrationTest {
     @MockitoSpyBean
     private Logger logger;
 
-    @Captor
-    private ArgumentCaptor<String> argumentCaptor;
-
     @Autowired
     private OrderMessageDefaultConsumerAspect orderMessageDefaultConsumerAspect;
 
     @BeforeAll
     static void before() {
-        container = new MockServerContainer(DockerImageName.parse(
-                "mockserver/mockserver:mockserver-5.15.0"));
+        container = new MockServerContainer(DockerImageName.parse("mockserver/mockserver:mockserver-7.5.0"));
         container.start();
         TestEnvironmentSetupHelper.setEnvironmentVariable("API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
@@ -112,6 +109,8 @@ class OrderMessageDefaultConsumerIntegrationTest {
         TestEnvironmentSetupHelper.setEnvironmentVariable("PAYMENTS_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
         TestEnvironmentSetupHelper.setEnvironmentVariable("DOCUMENT_API_LOCAL_URL",
+                "http://" + container.getHost() + ":" + container.getServerPort());
+        TestEnvironmentSetupHelper.setEnvironmentVariable("ORACLE_QUERY_API_URL",
                 "http://" + container.getHost() + ":" + container.getServerPort());
     }
 
@@ -141,18 +140,18 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(fixture,
                                 StandardCharsets.UTF_8))));
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
 
         // when
-        ProducerRecord<String, OrderReceived> record = new ProducerRecord<>(
+        ProducerRecord<String, OrderReceived> producerRecord = new ProducerRecord<>(
                 kafkaTopics.getOrderReceived(),
                 kafkaTopics.getOrderReceived(),
                 getOrderReceived());
 
-        Future<RecordMetadata> future = orderReceivedProducer.send(record);
+        Future<RecordMetadata> future = orderReceivedProducer.send(producerRecord);
 
         // Log the result once the message has been sent
         RecordMetadata metadata = future.get(); // This will block until the message is sent
@@ -178,7 +177,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod("GET"))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString("/fixtures/digital-certificate.json",
                                 StandardCharsets.UTF_8))));
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
@@ -209,7 +208,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString("/fixtures/multi-certified-certificate-timescales.json",
                                 StandardCharsets.UTF_8))));
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
@@ -235,7 +234,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(fixture,
                                 StandardCharsets.UTF_8))));
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
@@ -261,7 +260,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString("/fixtures/digital-copy.json",
                                 StandardCharsets.UTF_8))));
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
@@ -306,7 +305,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString("/fixtures/multi-certified-copy-timescales.json",
                                 StandardCharsets.UTF_8))));
         orderMessageDefaultConsumerAspect.setAfterProcessOrderReceivedEventLatch(new CountDownLatch(1));
@@ -330,7 +329,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/missing-image-delivery.json",
                                 StandardCharsets.UTF_8))));
@@ -359,7 +358,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
                         .withMethod(HttpMethod.GET.toString()))
                 .respond(response()
                         .withStatusCode(HttpStatus.OK.value())
-                        .withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, "application/json")
+                        .withHeader(CONTENT_TYPE, "application/json")
                         .withBody(JsonBody.json(IOUtils.resourceToString(
                                 "/fixtures/multiple-missing-image-delivery.json",
                                 StandardCharsets.UTF_8))));
@@ -375,10 +374,10 @@ class OrderMessageDefaultConsumerIntegrationTest {
         // then
         assertEquals(0, orderMessageDefaultConsumerAspect.getAfterProcessOrderReceivedEventLatch().getCount());
         assertEquals(2, actual.count());
-        for (ConsumerRecord<String, ChdItemOrdered> record : actual) {
-            assertEquals("ORD-123123-123123", record.value().getReference());
-            assertNotNull(record.value().getItem());
-            assertEquals("MID-123123-" + midId++, record.value().getItem().getId());
+        for (ConsumerRecord<String, ChdItemOrdered> producerRecord : actual) {
+            assertEquals("ORD-123123-123123", producerRecord.value().getReference());
+            assertNotNull(producerRecord.value().getItem());
+            assertEquals("MID-123123-" + midId++, producerRecord.value().getItem().getId());
         }
     }
 
@@ -402,6 +401,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
         // then
         assertEquals(0, orderMessageDefaultConsumerAspect.getAfterProcessOrderReceivedEventLatch().getCount());
         verify(orderProcessResponseHandler).serviceError(any());
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(logger).error(argumentCaptor.capture(), anyMap());
         assertEquals("order-received message processing failed with a "
                 + "non-recoverable exception", argumentCaptor.getValue());
@@ -432,13 +432,13 @@ class OrderMessageDefaultConsumerIntegrationTest {
     }
 
     private static String getNestedStringValue(final JsonNode node, final String key) {
-        return node.findValuesAsText(key) != null &&
-                node.findValuesAsText(key).size() == 1 ?
-                node.findValuesAsText(key).get(0) : "";
+        return node.findValuesAsString(key) != null &&
+                node.findValuesAsString(key).size() == 1 ?
+                node.findValuesAsString(key).getFirst() : "";
     }
 
     private static String getStringValue(final JsonNode node, final String key) {
-        return node.get(key) != null ? node.get(key).textValue() : "";
+        return node.get(key) != null ? node.get(key).stringValue() : "";
     }
 
     private static void assertItemGroupOrderedMessageIsAsExpected(final ItemGroupOrdered message,
@@ -448,7 +448,7 @@ class OrderMessageDefaultConsumerIntegrationTest {
         assertThat(message.getOrderId(), is(orderId));
         assertThat(message.getItems(), is(notNullValue()));
         assertThat(message.getItems().size(), is(1));
-        assertThat(message.getItems().get(0).getId(), is(itemId));
+        assertThat(message.getItems().getFirst().getId(), is(itemId));
         assertThat(message.getDeliveryDetails(), is(nullValue()));
     }
 }

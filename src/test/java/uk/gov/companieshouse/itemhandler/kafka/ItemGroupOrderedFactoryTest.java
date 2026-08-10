@@ -6,12 +6,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.itemhandler.exception.KafkaMessagingException;
 import uk.gov.companieshouse.itemhandler.itemsummary.ItemGroup;
 import uk.gov.companieshouse.itemhandler.model.ActionedBy;
